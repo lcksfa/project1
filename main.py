@@ -64,26 +64,31 @@ def run_agent_loop(agent):
                 print("Please enter a valid input.")
                 continue
                 
-            # 直接获取AI回复，不显示任何调试信息
-            response = agent.invoke(
+            # 使用流式输出，实时显示AI回复
+            print("\nMath Agent: ", end="", flush=True)
+            
+            # 收集AI回复内容
+            ai_response_content = ""
+            
+            # 使用流式API获取回复
+            for chunk in agent.stream(
                 {"messages": [HumanMessage(content=user_input)]}
-            )
-            
-            # 简洁地显示AI回复
-            print("\nMath Agent: ", end="")
-            
-            # 更直接地提取AI回复内容
-            if hasattr(response, 'output') and response.output:
-                print(response.output)
-            elif "messages" in response:
-                # 从消息列表中提取最后一个AI消息
-                messages = response["messages"]
-                if messages:
-                    last_message = messages[-1]
-                    if hasattr(last_message, 'content') and last_message.content:
-                        print(last_message.content)
-            else:
-                print("抱歉，我没有收到回复。")
+            ):
+                # 处理模型生成的消息
+                if "model" in chunk and "messages" in chunk["model"]:
+                    for message in chunk["model"]["messages"]:
+                        if hasattr(message, 'content') and message.content:
+                            # 只显示AI消息，过滤掉工具消息和HumanMessage
+                            from langchain_core.messages import AIMessage
+                            if isinstance(message, AIMessage):
+                                # 确保content是字符串类型
+                                content_str = str(message.content)
+                                # 实时输出每个字符，实现流式效果
+                                for char in content_str:
+                                    print(char, end="", flush=True)
+                                    ai_response_content += char
+                                
+            print()  # 添加换行符
             
         except KeyboardInterrupt:
             print("\n\nExiting Math Agent. Goodbye!")
