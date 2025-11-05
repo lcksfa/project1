@@ -64,14 +64,19 @@ def run_agent_loop(agent):
                 print("Please enter a valid input.")
                 continue
                 
-            print("\nMath Agent:", end="")
-            for chunk in agent.stream(
-                {"messages": [HumanMessage(content=user_input)]}  
-            ):
-                if "agent" in chunk and "messages" in chunk["agent"]:
-                    for message in chunk["agent"]["messages"]:
-                        print(message.content, end="", flush=True)
-            print()  # For newline after agent response
+            print("\nMath Agent: ", end="")
+            # 使用invoke而不是stream来获取简洁的回复
+            response = agent.invoke(
+                {"messages": [HumanMessage(content=user_input)]}
+            )
+            
+            # 只显示最后的AI回复内容
+            if "messages" in response:
+                for message in response["messages"]:
+                    if hasattr(message, 'content') and message.content:
+                        # 只显示AI助手的回复，过滤掉调试信息
+                        if not isinstance(message, HumanMessage):
+                            print(message.content)
             
         except KeyboardInterrupt:
             print("\n\nExiting Math Agent. Goodbye!")
