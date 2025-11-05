@@ -29,6 +29,9 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 _ = load_dotenv()
 
+# Type definition for numeric types
+Number = int | float | complex
+
 
 @dataclass
 class LLMConfig:
@@ -50,6 +53,41 @@ class LLMError(Exception):
 class MathAgentError(Exception):
     """Custom exception for math agent operations."""
     pass
+
+
+class MathOperationError(MathAgentError):
+    """Custom exception for mathematical operation errors."""
+    pass
+
+
+def convert_to_number(value: str | int | float) -> Number:
+    """
+    Convert a value to a numeric type.
+
+    Args:
+        value: The value to convert (string, int, or float)
+
+    Returns:
+        The numeric representation of the value
+
+    Raises:
+        MathOperationError: If the value cannot be converted to a number
+    """
+    if isinstance(value, (int, float, complex)):
+        return value
+
+    try:
+        # Try integer first
+        if '.' not in value and 'e' not in value.lower():
+            return int(value)
+        # Then try float
+        return float(value)
+    except ValueError:
+        # Finally try complex
+        try:
+            return complex(value)
+        except ValueError:
+            raise MathOperationError(f"Cannot convert '{value}' to a number")
 
 
 def create_llm(config: LLMConfig) -> ChatOpenAI:
@@ -80,33 +118,81 @@ def create_llm(config: LLMConfig) -> ChatOpenAI:
 
 
 @tool
-def add_numbers(first_number: int, second_number: int) -> int:
+def add_numbers(
+    first_number: str | int | float,
+    second_number: str | int | float
+) -> Number:
     """
-    Add two numbers together.
+    Add two numbers together with automatic type conversion.
+
+    This function supports integers, floats, and strings that represent numbers.
+    It automatically converts string inputs to appropriate numeric types.
 
     Args:
-        first_number: The first operand
-        second_number: The second operand
+        first_number: The first operand (can be string, int, or float)
+        second_number: The second operand (can be string, int, or float)
 
     Returns:
-        The sum of the two numbers
+        The sum of the two numbers (as int, float, or complex)
+
+    Raises:
+        MathOperationError: If either operand cannot be converted to a number
+
+    Examples:
+        >>> add_numbers(5, 3)
+        8
+        >>> add_numbers(5.5, 3.2)
+        8.7
+        >>> add_numbers("10", "20")
+        30
+        >>> add_numbers("3.14", 2)
+        5.14
     """
-    return first_number + second_number
+    try:
+        num1 = convert_to_number(first_number)
+        num2 = convert_to_number(second_number)
+        return num1 + num2
+    except MathOperationError as error:
+        raise MathOperationError(f"Addition failed: {error}") from error
 
 
 @tool
-def subtract_numbers(first_number: int, second_number: int) -> int:
+def subtract_numbers(
+    first_number: str | int | float,
+    second_number: str | int | float
+) -> Number:
     """
-    Subtract the second number from the first.
+    Subtract the second number from the first with automatic type conversion.
+
+    This function supports integers, floats, and strings that represent numbers.
+    It automatically converts string inputs to appropriate numeric types.
 
     Args:
-        first_number: The minuend
-        second_number: The subtrahend
+        first_number: The minuend (can be string, int, or float)
+        second_number: The subtrahend (can be string, int, or float)
 
     Returns:
-        The result of the subtraction
+        The result of the subtraction (as int, float, or complex)
+
+    Raises:
+        MathOperationError: If either operand cannot be converted to a number
+
+    Examples:
+        >>> subtract_numbers(10, 3)
+        7
+        >>> subtract_numbers(5.5, 2.2)
+        3.3
+        >>> subtract_numbers("20", "8")
+        12
+        >>> subtract_numbers("10.5", 3)
+        7.5
     """
-    return first_number - second_number
+    try:
+        num1 = convert_to_number(first_number)
+        num2 = convert_to_number(second_number)
+        return num1 - num2
+    except MathOperationError as error:
+        raise MathOperationError(f"Subtraction failed: {error}") from error
 
 
 def create_math_agent(llm: ChatOpenAI) -> object:
