@@ -25,6 +25,51 @@ uv add package_name
 uv sync --upgrade
 ```
 
+### Testing
+```bash
+# Run all tests
+make test
+
+# Run tests with coverage report
+make test-cov
+
+# Run specific test file
+uv run pytest tests/test_math_functions.py -v
+
+# Run tests with specific markers
+uv run pytest tests/ -m "unit"
+```
+
+### Code Quality
+```bash
+# Run linting checks
+make lint
+
+# Format code
+make format
+
+# Run all checks (lint + test)
+make check
+
+# Run everything (format + lint + test)
+make all
+```
+
+### Project Structure
+```
+project1/
+├── main.py                 # Main application file
+├── tests/                  # Test suite
+│   ├── __init__.py
+│   ├── test_math_functions.py  # Math operations tests
+│   └── test_app.py             # Application component tests
+├── .github/workflows/      # CI/CD configuration
+│   └── ci.yml
+├── pytest.ini             # pytest configuration
+├── Makefile               # Development commands
+└── CLAUDE.md             # This file
+```
+
 ### Environment Setup
 - Copy `.env` file and ensure `DEEPSEEK_API_KEY` is set
 - The application uses the DeepSeek API by default
