@@ -1,5 +1,6 @@
 # pylint: disable=missing-module-docstring
 import os
+import time
 from dataclasses import dataclass
 
 from langchain_core.messages import HumanMessage
@@ -83,10 +84,11 @@ def run_agent_loop(agent):
                             if isinstance(message, AIMessage):
                                 # 确保content是字符串类型
                                 content_str = str(message.content)
-                                # 实时输出每个字符，实现流式效果
+                                # 模拟流式输出，逐字符打印
                                 for char in content_str:
                                     print(char, end="", flush=True)
                                     ai_response_content += char
+                                    time.sleep(0.01)  # 添加小延时来模拟流式效果
                                 
             print()  # 添加换行符
             
