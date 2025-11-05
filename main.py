@@ -47,7 +47,7 @@ def create_math_agent(llm: ChatOpenAI):
     return create_agent(
         model=llm,
         tools=[add, subtract],
-        debug=True
+        debug=False  # 关闭调试模式，避免输出调试信息
     )
 
 def run_agent_loop(agent):
@@ -64,19 +64,26 @@ def run_agent_loop(agent):
                 print("Please enter a valid input.")
                 continue
                 
-            print("\nMath Agent: ", end="")
-            # 使用invoke而不是stream来获取简洁的回复
+            # 直接获取AI回复，不显示任何调试信息
             response = agent.invoke(
                 {"messages": [HumanMessage(content=user_input)]}
             )
             
-            # 只显示最后的AI回复内容
-            if "messages" in response:
-                for message in response["messages"]:
-                    if hasattr(message, 'content') and message.content:
-                        # 只显示AI助手的回复，过滤掉调试信息
-                        if not isinstance(message, HumanMessage):
-                            print(message.content)
+            # 简洁地显示AI回复
+            print("\nMath Agent: ", end="")
+            
+            # 更直接地提取AI回复内容
+            if hasattr(response, 'output') and response.output:
+                print(response.output)
+            elif "messages" in response:
+                # 从消息列表中提取最后一个AI消息
+                messages = response["messages"]
+                if messages:
+                    last_message = messages[-1]
+                    if hasattr(last_message, 'content') and last_message.content:
+                        print(last_message.content)
+            else:
+                print("抱歉，我没有收到回复。")
             
         except KeyboardInterrupt:
             print("\n\nExiting Math Agent. Goodbye!")
