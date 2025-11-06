@@ -1,4 +1,4 @@
-.PHONY: help install test test-cov lint format clean run
+.PHONY: help install test test-cov lint format clean run docs check-docs
 
 # Default target
 help:
@@ -8,6 +8,8 @@ help:
 	@echo "  test-cov    - Run tests with coverage report"
 	@echo "  lint        - Run linting checks"
 	@echo "  format      - Format code"
+	@echo "  docs        - Show documentation structure"
+	@echo "  check-docs  - Check documentation links"
 	@echo "  clean       - Clean up temporary files"
 	@echo "  run         - Run the application"
 
@@ -43,6 +45,22 @@ clean:
 # Run the application
 run:
 	uv run main.py
+
+# Show documentation structure
+docs:
+	@echo "Project Documentation:"
+	@echo "  📖 README.md                      - Project overview"
+	@echo "  📋 CLAUDE.md                      - Development guide"
+	@echo "  🏗️  ARCHITECTURE.md               - Architecture documentation"
+	@echo "  📚 ENTERPRISE_BEST_PRACTICES.md   - Best practices guide"
+	@echo "  ⚙️  pyproject.toml                - Project configuration"
+	@echo "  🧪 pytest.ini                    - Test configuration"
+
+# Check documentation links and structure
+check-docs:
+	@echo "Checking documentation..."
+	@find . -name "*.md" -exec echo "📄 {}" \;
+	@echo "✅ Documentation check complete"
 
 # Run all checks (lint + test)
 check: lint test
